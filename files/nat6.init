@@ -31,17 +31,24 @@ common_config() {
 			set network.globals.ula_prefix="fd$r1:2024::/48"
 			commit network
 EOF
+		/etc/init.d/network reload
 	fi
-	uci -q batch <<-EOF >/dev/null
-		set dhcp.lan.ra='server'
-		set dhcp.lan.dhcpv6='server'
-		del dhcp.lan.ndp
-		set dhcp.lan.ra_default='2'
-		del dhcp.lan.ra_slaac
-		commit dhcp
+	lan_ra=$(uci -q get dhcp.lan.ra)
+	lan_dhcp6=$(uci -q get dhcp.lan.dhcpv6)
+	lan_ndp=$(uci -q get dhcp.lan.ndp)
+	lan_ra_default=$(uci -q get dhcp.lan.ra_default)
+	lan_ra_slaac=$(uci -q get dhcp.lan.ra_slaac)
+	if [ "$lan_ra" != "server" ] || [ "$lan_dhcp6" != "server" ] || [ "$lan_ndp" != "" ] || [ "$lan_ra_default" != "2" ] || [ "$lan_ra_slaac" != "" ]; then
+		uci -q batch <<-EOF >/dev/null
+			set dhcp.lan.ra='server'
+			set dhcp.lan.dhcpv6='server'
+			del dhcp.lan.ndp
+			set dhcp.lan.ra_default='2'
+			del dhcp.lan.ra_slaac
+			commit dhcp
 EOF
-	/etc/init.d/network reload
-	/etc/init.d/odhcpd reload
+		/etc/init.d/odhcpd reload
+	fi
 }
 
 start() {
@@ -85,5 +92,4 @@ stop() {
 		del dhcp.lan.ra_default
 		commit dhcp
 EOF
-	/etc/init.d/odhcpd reload
 }
