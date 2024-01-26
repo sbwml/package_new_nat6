@@ -38,13 +38,13 @@ EOF
 	lan_ndp=$(uci -q get dhcp.lan.ndp)
 	lan_ra_default=$(uci -q get dhcp.lan.ra_default)
 	lan_ra_slaac=$(uci -q get dhcp.lan.ra_slaac)
-	if [ "$lan_ra" != "server" ] || [ "$lan_dhcp6" != "server" ] || [ "$lan_ndp" != "" ] || [ "$lan_ra_default" != "2" ] || [ "$lan_ra_slaac" != "" ]; then
+	if [ "$lan_ra" != "server" ] || [ "$lan_dhcp6" != "server" ] || [ "$lan_ndp" != "" ] || [ "$lan_ra_default" != "2" ] || [ "$lan_ra_slaac" != "0" ]; then
 		uci -q batch <<-EOF >/dev/null
 			set dhcp.lan.ra='server'
 			set dhcp.lan.dhcpv6='server'
 			del dhcp.lan.ndp
 			set dhcp.lan.ra_default='2'
-			del dhcp.lan.ra_slaac
+			set dhcp.lan.ra_slaac='0'
 			commit dhcp
 EOF
 		/etc/init.d/odhcpd reload
@@ -92,4 +92,11 @@ stop() {
 		del dhcp.lan.ra_default
 		commit dhcp
 EOF
+	if [ "$(uci -q get dhcp.lan.ra_slaac)" != "" ]; then
+		uci -q batch <<-EOF >/dev/null
+			del dhcp.lan.ra_slaac
+			commit dhcp
+EOF
+	fi
+	/etc/init.d/odhcpd reload
 }
