@@ -45,6 +45,8 @@ EOF
 			del dhcp.lan.ndp
 			set dhcp.lan.ra_default='2'
 			set dhcp.lan.ra_slaac='0'
+			del dhcp.lan.ra_flags
+			add_list dhcp.lan.ra_flags='managed-config'
 			commit dhcp
 EOF
 		/etc/init.d/odhcpd reload
@@ -95,6 +97,7 @@ EOF
 	if [ "$(uci -q get dhcp.lan.ra_slaac)" != "" ]; then
 		uci -q batch <<-EOF >/dev/null
 			del dhcp.lan.ra_slaac
+			del dhcp.lan.ra_flags
 			commit dhcp
 EOF
 	fi
