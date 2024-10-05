@@ -23,6 +23,8 @@ define Package/nat6/install
 	$(INSTALL_BIN) ./files/60-luci-firewall-nat6 $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/nat6.init $(1)/etc/init.d/nat6
+	$(INSTALL_DIR) $(1)/usr/share/ucitrack
+	$(INSTALL_CONF) ./files/nat6.ucitrack $(1)/usr/share/ucitrack/nat6.json
 endef
 
 $(eval $(call BuildPackage,nat6))
